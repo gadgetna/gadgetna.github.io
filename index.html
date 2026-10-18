@@ -541,7 +541,7 @@ function buildOrderMessage(d){
     ...(d.notes ? [`ملاحظات: ${d.notes}`] : [])
   ].join("\n");
 }
-function buildWhatsAppUrl(d){ return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildOrderMessage(d))}`; }
+function buildWhatsAppUrl(d){ return `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(buildOrderMessage(d))}`; }
 
 document.addEventListener("click", e => {
   const a = e.target.closest("[data-add]"), inc = e.target.closest("[data-inc]"), dec = e.target.closest("[data-dec]");
@@ -595,7 +595,7 @@ document.addEventListener("click", e => {
   const btn = e.target;
   copyText(paymentTarget(selectedPayment())).then(() => { btn.textContent = t("copied"); toast(t("copied")); setTimeout(() => btn.textContent = t("copy"), 1500); });
 });
-$("waFloat").href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("أهلاً جادجتنا 👋 عندي استفسار")}`;
+$("waFloat").href = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent("أهلاً جادجتنا 👋 عندي استفسار")}`;
 $("igLink").href = INSTAGRAM_URL; $("ttLink").href = TIKTOK_URL;
 $("year").textContent = new Date().getFullYear();
 sanitizeCart();
