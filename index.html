@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gadgetna جادجتنا | متجرك أونلاين لكل اللي محتاجه</title>
+<meta name="description" content="جادجتنا - كل اللي محتاجه في مكان واحد. منتجات كويسة بأسعار عادلة، توصيل لكل محافظات مصر، والدفع كاش عند الاستلام أو إنستاباي أو فودافون كاش. Gadgetna - Everything you need, in one place.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<script>
+/* =====================================================================
+   GADGETNA CONFIG — EDIT HERE
+   ===================================================================== */
+
+// WhatsApp number in international format, digits only (no +, no leading 0).
+// 01018678805 -> 201018678805
+const WHATSAPP_NUMBER = "201018678805";
+
+// Flat shipping fee in EGP (Angazny charges a flat 80 EGP anywhere in Egypt)
+const SHIPPING_FEE_EGP = 80;
+
+// PAYMENT
+// TODO: replace with your real InstaPay address (IPA), e.g. "gadgetna@instapay"
+const INSTAPAY_ADDRESS = "yasin03112010@instapay";
+// TODO: confirm this is the number your Vodafone Cash wallet is registered on
+const VODAFONE_CASH_NUMBER = "01039443500";
+
+// Social handles (placeholders — update when the accounts are created)
+const INSTAGRAM_URL = "https://instagram.com/gadgetna.eg";
+const TIKTOK_URL    = "https://www.tiktok.com/@gadgetna.eg";
+
+// PRODUCTS — edit this list to add/remove products.
+// image: a path to your photo (e.g. "assets/my-product.jpg") or an emoji.
+// badge (optional): { ar: "...", en: "..." }
+// options (optional), e.g. colours — the customer must pick one before adding to cart:
+//   options: { label_ar: "اللون", label_en: "Colour", values: [ { ar: "أسود", en: "Black" }, ... ] }
+//   To mark a value out of stock, just remove it from the list.
+const PRODUCTS = [
+  {
+    id: "magnetic-powerbank",
+    name_ar: "باور بانك مغناطيسي لاسلكي",
+    name_en: "Magnetic Wireless Power Bank",
+    price_egp: 599,
+    image: "assets/magnetic-powerbank.jpg",
+    badge: { ar: "جديد", en: "New" },
+    description_ar: "باور بانك مغناطيسي بيلزق في ضهر الموبايل ويشحن لاسلكي. خفيف ونحيف وسهل تحمله في جيبك، بشحن سريع وحماية آمنة.",
+    description_en: "Snaps magnetically to the back of your phone and charges wirelessly. Slim, light and pocket-friendly, with fast and safe charging."
+  },
+  {
+    id: "carbon-watch",
+    name_ar: "ساعة كاربون رجالي",
+    name_en: "Men's Carbon Watch",
+    price_egp: 349,
+    image: "assets/mens-watch.jpg",
+    badge: { ar: "جديد", en: "New" },
+    description_ar: "ساعة رجالي شيك بتصميم عصري وخامة كاربون خفيفة، تنفع للشغل والخروج. متاحة بألوان كتير.",
+    description_en: "A stylish men's watch with a modern design and lightweight carbon look, great for work and going out. Available in several colours.",
+    options: {
+      label_ar: "اللون", label_en: "Colour",
+      values: [
+        { ar: "أسود", en: "Black" },
+        { ar: "أبيض", en: "White" },
+        { ar: "رمادي", en: "Grey" },
+        { ar: "زيتي", en: "Olive" },
+        { ar: "كحلي", en: "Navy" },
+        { ar: "أسود أرقام عربي", en: "Black (Arabic numerals)" }
+        // أبيض أرقام عربي / White (Arabic numerals): out of stock — add back here when available
+      ]
+    }
+  }
+];
+/* ===================================================================== */
+</script>
+<style>
+:root{--bg:#030303;--card:#0d0f0b;--card2:#151812;--line:#22261d;--text:#ffffff;--muted:#a6ab9f;--accent:#9bff2e;--accent2:#7ad61f;--glow:0 0 18px rgba(155,255,46,.35);--wa:#25d366;--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px;gap:8px}
+.logo{display:flex;align-items:center;gap:10px;direction:ltr}
+.logo img{width:38px;height:38px;border-radius:10px;filter:drop-shadow(0 0 6px rgba(155,255,46,.45))}
+.logo .word{font-weight:700;font-size:1.05rem;letter-spacing:.32em;color:#fff;font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif}
+.nav-actions{display:flex;gap:8px;align-items:center}
+.btn-ghost{background:var(--card2);color:var(--text);padding:8px 12px;border-radius:10px;border:1px solid var(--line);font-size:.9rem}
+.cart-btn{position:relative}
+.badge{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--accent);color:#071200;box-shadow:var(--glow);font-size:.72rem;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px}
+.hero{padding:28px 0 36px;text-align:center;background:radial-gradient(520px 280px at 50% 22%,rgba(155,255,46,.10),transparent 70%),#000}
+.hero-logo{display:block;width:min(360px,78%);height:auto;margin:0 auto 10px;mix-blend-mode:screen}
+.hero h1{font-size:clamp(1.8rem,6vw,3rem);line-height:1.25;font-weight:800}
+.hero h1 .hl{color:var(--accent);text-shadow:0 0 22px rgba(155,255,46,.45)}
+.hero p{color:var(--muted);margin:12px auto 22px;max-width:560px}
+.btn{display:inline-block;background:var(--accent);box-shadow:var(--glow);color:#071200;font-weight:800;padding:12px 22px;border-radius:12px}
+.btn.wa{background:var(--wa);color:#05210f}
+.btn.full{width:100%;text-align:center;padding:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+.chip{background:var(--card);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:.85rem;color:var(--muted)}
+section{padding:40px 0}
+h2{font-size:1.6rem;margin-bottom:6px}
+.sub{color:var(--muted);margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid.few{grid-template-columns:minmax(0,360px);justify-content:center}
+@media(min-width:720px){.grid{grid-template-columns:repeat(3,1fr);gap:18px}.grid.few{grid-template-columns:repeat(var(--n),minmax(0,340px))}.card .img{aspect-ratio:16/10;font-size:4rem}}
+.card{transition:border-color .2s,box-shadow .2s;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.card .img{aspect-ratio:1/1;display:grid;place-items:center;font-size:3.6rem;background:radial-gradient(circle at 50% 45%,rgba(155,255,46,.12),transparent 65%),#080a06;border-bottom:1px solid var(--line)}
+.card .img.photo{background:#fff;padding:10px;aspect-ratio:5/4}
+.card .img img{width:100%;height:100%;object-fit:contain;border-radius:10px;display:block}
+.card .body{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:.98rem;line-height:1.4}
+.card .desc{color:var(--muted);font-size:.82rem;flex:1}
+.price{font-weight:800;color:var(--accent);font-size:1.1rem;text-shadow:0 0 10px rgba(155,255,46,.35)}
+.card:hover{border-color:rgba(155,255,46,.5);box-shadow:var(--glow)}
+.add:hover{background:var(--accent);color:#071200}
+.add{background:var(--card2);color:var(--text);border:1px solid var(--accent);padding:9px;border-radius:10px;font-weight:700;font-size:.9rem}
+.add:active{transform:scale(.97)}
+.opts-label{font-size:.78rem;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt-chip{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.78rem;line-height:1.4;transition:border-color .15s,box-shadow .15s}
+.opt-chip:hover{border-color:rgba(155,255,46,.5)}
+.opt-chip.sel{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow);font-weight:700}
+.opt-err{color:#ff7a7a;font-size:.78rem;min-height:0}
+.opt-err:empty{display:none}
+.line .info .opt{color:var(--accent);font-weight:700}
+.ribbon{position:absolute;top:10px;inset-inline-start:10px;background:var(--accent);color:#071200;box-shadow:var(--glow);font-size:.72rem;font-weight:800;padding:3px 8px;border-radius:6px}
+.sample-note{font-size:.8rem;color:#ffcc66;background:rgba(255,204,102,.08);border:1px dashed rgba(255,204,102,.4);padding:8px 12px;border-radius:10px;margin-bottom:16px}
+.why{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:720px){.why{grid-template-columns:repeat(3,1fr)}}
+.why .item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.why .ico{font-size:2rem;filter:drop-shadow(0 0 8px rgba(155,255,46,.35))}
+h2{position:relative}h2::after{content:"";display:block;width:44px;height:3px;border-radius:2px;background:var(--accent);box-shadow:var(--glow);margin-top:6px}
+.why h3{margin:6px 0 4px}
+.why p{color:var(--muted);font-size:.9rem}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+summary{font-weight:700;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";float:inline-end;color:var(--accent);font-weight:800}
+details[open] summary::after{content:"−"}
+details p{color:var(--muted);margin-top:8px;font-size:.92rem}
+footer{border-top:1px solid var(--line);padding:28px 0 90px;text-align:center;color:var(--muted);font-size:.9rem}
+footer .socials{display:flex;gap:10px;justify-content:center;margin:12px 0}
+footer .socials a{background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:10px;color:var(--text)}
+.wa-float{bottom:18px;position:fixed;bottom:18px;inset-inline-start:18px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--wa);display:grid;place-items:center;box-shadow:0 6px 20px rgba(37,211,102,.45)}
+.wa-float svg{width:32px;height:32px;fill:#fff}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;opacity:0;pointer-events:none;transition:.2s}
+.overlay.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;inset-inline-end:0;width:min(440px,100%);background:var(--bg);border-inline-start:1px solid var(--line);z-index:90;transform:translateX(-105%);transition:transform .25s;display:flex;flex-direction:column}
+[dir=ltr] .drawer{transform:translateX(105%)}
+.drawer.open{transform:translateX(0)!important}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer-body{flex:1;overflow:auto;padding:16px}
+.line{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.line .em{font-size:1.8rem;width:44px;text-align:center}
+.line .info{flex:1;font-size:.9rem}
+.line .info small{color:var(--muted);display:block}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:30px;height:30px;border-radius:8px;background:var(--card2);color:var(--text);border:1px solid var(--line);font-weight:800}
+.totals{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}
+.totals div{display:flex;justify-content:space-between;padding:3px 0}
+.totals .grand{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:800;font-size:1.1rem;color:var(--accent)}
+.cod{font-size:.85rem;color:var(--muted);margin-bottom:14px}
+form label{display:block;font-size:.85rem;margin:10px 0 4px;color:var(--muted)}
+form input,form select,form textarea{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px;font:inherit}
+form input:focus,form select:focus,form textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+.err{color:#ff7a7a;font-size:.8rem;min-height:1em}
+.pay-title{display:block;font-size:.85rem;margin:14px 0 8px;color:var(--muted)}
+.pay-opts{display:grid;gap:8px}
+form label.pay-opt{display:flex;margin:0;color:var(--text);font-size:1rem;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.pay-opt input{position:absolute;opacity:0;width:1px;height:1px}
+.pay-opt .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.pay-opt .pi{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--card2);font-size:1.15rem;flex:none}
+.pay-opt .pl{flex:1;font-weight:700;font-size:.95rem;line-height:1.3}
+.pay-opt .pl small{display:block;font-weight:500;color:var(--muted);font-size:.75rem}
+.pay-opt:has(input:checked){border-color:var(--accent);box-shadow:var(--glow)}
+.pay-opt:has(input:checked) .dot{border-color:var(--accent)}
+.pay-opt:has(input:checked) .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:var(--glow)}
+.pay-opt input:focus-visible ~ .dot{outline:2px solid var(--accent);outline-offset:2px}
+.pay-box{margin-top:10px;background:rgba(155,255,46,.06);border:1px dashed rgba(155,255,46,.55);border-radius:12px;padding:12px;font-size:.9rem}
+.pay-box .row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.pay-box .val{font-weight:800;color:var(--accent);direction:ltr;word-break:break-all;text-shadow:0 0 8px rgba(155,255,46,.3)}
+.pay-box .copy{background:var(--accent);color:#071200;font-weight:800;border-radius:8px;padding:6px 12px;font-size:.8rem;flex:none}
+.pay-box .amt{font-size:1.05rem}
+.pay-box .amt b{color:var(--accent)}
+.pay-box p{color:var(--muted);margin-top:6px}
+.empty{text-align:center;color:var(--muted);padding:30px 0}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:#071200;box-shadow:var(--glow);padding:10px 18px;border-radius:999px;font-weight:700;z-index:100;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.en-sub{display:block;font-size:.75em;color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo" aria-label="Gadgetna"><img src="assets/logo.png" alt="Gadgetna logo" width="38" height="38"><span class="word">GADGETNA</span></a>
+    <div class="nav-actions">
+      <button class="btn-ghost" id="langBtn" type="button">English</button>
+      <button class="btn-ghost cart-btn" id="cartBtn" type="button" aria-label="Cart">🛒 <span data-i18n="cart">السلة</span><span class="badge" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <img class="hero-logo" src="assets/logo-wide.png" alt="GADGETNA" width="600" height="459">
+    <h1 data-i18n-html="heroTitle">كل اللي محتاجه <span class="hl">في مكان واحد</span></h1>
+    <p data-i18n="heroText">منتجات كويسة بأسعار عادلة، وتوصيل لكل محافظات مصر. ادفع كاش عند الاستلام أو بإنستاباي أو فودافون كاش.</p>
+    <a href="#products" class="btn" data-i18n="shopNow">تسوق دلوقتي</a>
+    <div class="chips">
+      <span class="chip" data-i18n="chip1">💳 كاش، إنستاباي أو فودافون كاش</span>
+      <span class="chip" data-i18n="chip2">🚚 توصيل لكل مصر</span>
+      <span class="chip" data-i18n="chip3">↩️ استرجاع خلال 14 يوم</span>
+    </div>
+  </div>
+</section>
+
+<section id="products">
+  <div class="wrap">
+    <h2 data-i18n="productsTitle">منتجاتنا</h2>
+    <p class="sub" data-i18n="productsSub">اختار اللي محتاجه وضيفه للسلة</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <h2 data-i18n="whyTitle">ليه جادجتنا؟</h2>
+    <p class="sub" data-i18n="whySub">بنخلي الشراء أونلاين سهل ومضمون</p>
+    <div class="why">
+      <div class="item"><div class="ico">💳</div><h3 data-i18n="w1t">ادفع بالطريقة اللي تريحك</h3><p data-i18n="w1p">كاش عند الاستلام، أو حوّل مقدمًا بإنستاباي أو فودافون كاش.</p></div>
+      <div class="item"><div class="ico">🚚</div><h3 data-i18n="w2t">توصيل لكل محافظات مصر</h3><p data-i18n="w2p">بنوصل لحد باب البيت في كل المحافظات بسعر شحن ثابت.</p></div>
+      <div class="item"><div class="ico">↩️</div><h3 data-i18n="w3t">استرجاع خلال 14 يوم</h3><p data-i18n="w3p">لو المنتج مش عاجبك تقدر ترجعه خلال 14 يوم من الاستلام.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2 data-i18n="faqTitle">أسئلة شائعة</h2>
+    <p class="sub" data-i18n="faqSub">لو عندك سؤال تاني كلمنا واتساب</p>
+    <details><summary data-i18n="q1">إزاي أطلب؟</summary><p data-i18n="a1">ضيف المنتجات للسلة، اكتب بياناتك واضغط "أكد الطلب على واتساب". هيتفتح واتساب برسالة فيها تفاصيل طلبك، ابعتها وهنأكد معاك.</p></details>
+    <details><summary data-i18n="q2">الشحن بكام وبياخد قد إيه؟</summary><p data-i18n="a2"></p></details>
+    <details><summary data-i18n="q3">إزاي أدفع؟</summary><p data-i18n="a3">عندك 3 طرق: كاش عند الاستلام لمندوب الشحن، أو تحويل بإنستاباي، أو فودافون كاش. لو اخترت التحويل، هيظهرلك الحساب والمبلغ بالظبط، وتبعتلنا سكرين شوت التحويل على واتساب.</p></details>
+    <details><summary data-i18n="q4">لو المنتج فيه مشكلة؟</summary><p data-i18n="a4">تقدر ترجع أي منتج خلال 14 يوم من الاستلام. كلمنا على واتساب وهنساعدك فورًا.</p></details>
+    <details><summary data-i18n="q5">المنتجات أصلية؟</summary><p data-i18n="a5">بنختار منتجاتنا من موردين موثوقين وبنوضح مواصفات كل منتج بصدق.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="logo" style="justify-content:center"><img src="assets/logo.png" alt="" width="38" height="38"><span class="word">GADGETNA</span></div>
+    <div style="margin-top:4px">جادجتنا — <span data-i18n="footTag">كل اللي محتاجه في مكان واحد</span></div>
+    <div class="socials">
+      <a id="igLink" target="_blank" rel="noopener">📸 Instagram @gadgetna.eg</a>
+      <a id="ttLink" target="_blank" rel="noopener">🎵 TikTok @gadgetna.eg</a>
+    </div>
+    <div>© <span id="year"></span> Gadgetna — <span data-i18n="rights">جميع الحقوق محفوظة</span></div>
+  </div>
+</footer>
+
+<a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 32 32"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.2c1.9 1 4 1.6 6.1 1.6 7 0 12.7-5.6 12.7-12.6S23 3 16 3zm0 23.1c-2 0-3.9-.6-5.5-1.6l-.4-.2-4.1 1.3 1.3-4-.3-.4c-1.1-1.7-1.7-3.6-1.7-5.6C5.3 9.8 10.1 5.1 16 5.1s10.7 4.7 10.7 10.5S21.9 26.1 16 26.1zm5.9-7.8c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1c-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2s0-.5.1-.6l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.2 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg>
+</a>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Cart">
+  <div class="drawer-head">
+    <strong data-i18n="yourCart">سلة المشتريات</strong>
+    <button class="btn-ghost" id="closeCart" type="button">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div id="cartLines"></div>
+    <div id="checkoutArea">
+      <div class="totals">
+        <div><span data-i18n="subtotal">المجموع</span><span id="subtotal"></span></div>
+        <div><span data-i18n="shipping">الشحن</span><span id="shipping"></span></div>
+        <div class="grand"><span data-i18n="total">الإجمالي</span><span id="total"></span></div>
+      </div>
+      <p class="cod" data-i18n="codNote">💳 اختار طريقة الدفع تحت: كاش عند الاستلام، إنستاباي أو فودافون كاش.</p>
+      <form id="checkoutForm" novalidate>
+        <label for="fName" data-i18n="fName">الاسم بالكامل *</label>
+        <input id="fName" name="name" autocomplete="name" required>
+        <div class="err" id="eName"></div>
+        <label for="fPhone" data-i18n="fPhone">رقم الموبايل *</label>
+        <input id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" dir="ltr" autocomplete="tel" required>
+        <div class="err" id="ePhone"></div>
+        <label for="fGov" data-i18n="fGov">المحافظة *</label>
+        <select id="fGov" name="governorate" required></select>
+        <div class="err" id="eGov"></div>
+        <label for="fAddr" data-i18n="fAddr">العنوان بالتفصيل *</label>
+        <textarea id="fAddr" name="address" rows="2" required></textarea>
+        <div class="err" id="eAddr"></div>
+        <label for="fNotes" data-i18n="fNotes">ملاحظات (اختياري)</label>
+        <textarea id="fNotes" name="notes" rows="2"></textarea>
+        <span class="pay-title" data-i18n="payTitle">طريقة الدفع *</span>
+        <div class="pay-opts" role="radiogroup">
+          <label class="pay-opt"><input type="radio" name="payment" value="cod" checked><span class="dot"></span><span class="pi">💵</span><span class="pl">الدفع عند الاستلام<small>Cash on delivery</small></span></label>
+          <label class="pay-opt"><input type="radio" name="payment" value="instapay"><span class="dot"></span><span class="pi">🏦</span><span class="pl">إنستاباي<small>InstaPay</small></span></label>
+          <label class="pay-opt"><input type="radio" name="payment" value="vodafone"><span class="dot"></span><span class="pi" style="color:#ff3b3b">📱</span><span class="pl">فودافون كاش<small>Vodafone Cash</small></span></label>
+        </div>
+        <div class="pay-box" id="payBox" hidden></div>
+        <div style="height:14px"></div>
+        <button class="btn wa full" type="submit" data-i18n="submit">أكد الطلب على واتساب ✅</button>
+      </form>
+    </div>
+  </div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+const GOVERNORATES = [
+  ["القاهرة","Cairo"],["الجيزة","Giza"],["الإسكندرية","Alexandria"],["القليوبية","Qalyubia"],["الشرقية","Sharqia"],
+  ["الدقهلية","Dakahlia"],["الغربية","Gharbia"],["المنوفية","Monufia"],["البحيرة","Beheira"],["كفر الشيخ","Kafr El Sheikh"],
+  ["دمياط","Damietta"],["بورسعيد","Port Said"],["الإسماعيلية","Ismailia"],["السويس","Suez"],["شمال سيناء","North Sinai"],
+  ["جنوب سيناء","South Sinai"],["الفيوم","Faiyum"],["بني سويف","Beni Suef"],["المنيا","Minya"],["أسيوط","Asyut"],
+  ["سوهاج","Sohag"],["قنا","Qena"],["الأقصر","Luxor"],["أسوان","Aswan"],["البحر الأحمر","Red Sea"],
+  ["الوادي الجديد","New Valley"],["مطروح","Matrouh"]
+];
+
+const I18N = {
+  en: {
+    cart:"Cart", heroTitle:'Everything you need, <span class="hl">in one place</span>',
+    heroText:"Good products at fair prices, delivered all over Egypt. Pay cash on delivery, or with InstaPay or Vodafone Cash.",
+    shopNow:"Shop now", chip1:"💳 Cash, InstaPay or Vodafone Cash", chip2:"🚚 Delivery all over Egypt", chip3:"↩️ 14-day returns",
+    productsTitle:"Our products", productsSub:"Pick what you need and add it to your cart",
+    whyTitle:"Why Gadgetna?", whySub:"Online shopping made easy and safe",
+    w1t:"Pay your way", w1p:"Cash on delivery, or pay upfront with InstaPay or Vodafone Cash.",
+    w2t:"Delivery all over Egypt", w2p:"Door-to-door delivery to every governorate with a flat shipping fee.",
+    w3t:"14-day returns", w3p:"Not happy? Return it within 14 days of delivery.",
+    faqTitle:"FAQ", faqSub:"Any other question? Message us on WhatsApp",
+    q1:"How do I order?", a1:'Add products to your cart, fill in your details and tap "Confirm order on WhatsApp". WhatsApp opens with your order details — send it and we\'ll confirm.',
+    q2:"How much is shipping and how long does it take?", a2:`Shipping is a flat ${SHIPPING_FEE_EGP} EGP to any governorate, usually 2–5 working days.`,
+    q3:"How do I pay?", a3:"Three ways: cash on delivery to the courier, InstaPay, or Vodafone Cash. If you choose a transfer, you'll see the account and the exact amount, then send us the transfer screenshot on WhatsApp.",
+    q4:"What if there's a problem with the product?", a4:"You can return any product within 14 days of delivery. Message us on WhatsApp and we'll help right away.",
+    q5:"Are the products genuine?", a5:"We source from trusted suppliers and describe every product honestly.",
+    rights:"All rights reserved", footTag:"Everything you need, in one place", yourCart:"Your cart", subtotal:"Subtotal", shipping:"Shipping", total:"Total",
+    codNote:"💳 Choose your payment method below: cash on delivery, InstaPay or Vodafone Cash.",
+    payTitle:"Payment method *", payTo_instapay:"Send the transfer to this InstaPay address:", payTo_vodafone:"Send the transfer to this Vodafone Cash number:", amountToPay:"Exact amount to transfer:", payInstr:"After transferring, send the transfer screenshot with your order on WhatsApp so we can confirm it.", copy:"Copy", copied:"Copied ✓",
+    fName:"Full name *", fPhone:"Mobile number *", fGov:"Governorate *", fAddr:"Full address *", fNotes:"Notes (optional)",
+    submit:"Confirm order on WhatsApp ✅", add:"Add to cart", added:"Added to cart ✓", empty:"Your cart is empty 🛒",
+    chooseGov:"Choose governorate", errName:"Please enter your name", errPhone:"Enter a valid Egyptian mobile (01xxxxxxxxx)",
+    errGov:"Please choose your governorate", errAddr:"Please enter your address", egp:"EGP", bundle:"Best value",
+    sample:"⚠️ Sample products and prices — for demo only.", remove:"Remove", lang:"عربي", chooseOpt:"⚠️ Please choose a"
+  },
+  ar: {
+    a2:`الشحن ${SHIPPING_FEE_EGP} جنيه ثابت لأي محافظة، وبيوصل عادة خلال 2 إلى 5 أيام عمل.`,
+    add:"أضف للسلة", added:"اتضاف للسلة ✓", empty:"السلة فاضية 🛒", chooseGov:"اختار المحافظة",
+    errName:"من فضلك اكتب اسمك", errPhone:"اكتب رقم موبايل مصري صحيح (01xxxxxxxxx)", errGov:"من فضلك اختار المحافظة",
+    errAddr:"من فضلك اكتب العنوان", egp:"ج.م", bundle:"أوفر اختيار", sample:"⚠️ منتجات وأسعار تجريبية — للعرض فقط.",
+    remove:"حذف", lang:"English", chooseOpt:"⚠️ من فضلك اختار", copy:"نسخ", copied:"اتنسخ ✓",
+    payTo_instapay:"حوّل على عنوان إنستاباي ده:", payTo_vodafone:"حوّل على رقم فودافون كاش ده:", amountToPay:"المبلغ المطلوب تحويله بالظبط:", payInstr:"بعد التحويل، ابعت سكرين شوت التحويل مع الطلب على واتساب علشان نأكد طلبك."
+  }
+};
+
+let lang = localStorage.getItem("gadgetna_lang") || "ar";
+let cart = {};
+try { cart = JSON.parse(localStorage.getItem("gadgetna_cart") || "{}") || {}; } catch(e) { cart = {}; }
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("en-US") + " " + t("egp");
+const pName = p => lang === "ar" ? p.name_ar : p.name_en;
+const pDesc = p => lang === "ar" ? (p.description_ar || p.description || "") : (p.description_en || p.description || "");
+const isImg = s => /\.(png|jpe?g|webp|gif|svg)$|^https?:|^data:/i.test(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+// Arabic defaults are captured from the HTML on first load
+const AR_DEFAULTS = {};
+document.querySelectorAll("[data-i18n]").forEach(el => AR_DEFAULTS[el.dataset.i18n] = el.textContent);
+document.querySelectorAll("[data-i18n-html]").forEach(el => AR_DEFAULTS[el.dataset.i18nHtml] = el.innerHTML);
+function t(k){ return (I18N[lang] && I18N[lang][k]) ?? AR_DEFAULTS[k] ?? I18N.ar[k] ?? k; }
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-html]").forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  $("langBtn").textContent = t("lang");
+  const sel = $("fGov"), cur = sel.value;
+  sel.innerHTML = `<option value="">${t("chooseGov")}</option>` +
+    GOVERNORATES.map(g => `<option value="${g[0]}">${lang === "ar" ? g[0] : g[1] + " — " + g[0]}</option>`).join("");
+  sel.value = cur;
+  renderProducts(); renderCart();
+}
+
+function renderProducts(){
+  const g = $("grid"); g.classList.toggle("few", PRODUCTS.length < 3); g.style.setProperty("--n", PRODUCTS.length);
+  $("grid").innerHTML = PRODUCTS.map(p => `
+    <article class="card">
+      ${p.badge ? `<span class="ribbon">${esc(typeof p.badge === "object" ? (p.badge[lang] || p.badge.ar) : p.badge === true ? t("bundle") : p.badge)}</span>` : ""}
+      <div class="img${isImg(p.image) ? " photo" : ""}">${isImg(p.image) ? `<img src="${esc(p.image)}" alt="${esc(pName(p))}" loading="lazy">` : p.image}</div>
+      <div class="body">
+        <h3>${esc(pName(p))}${lang === "ar" ? `<span class="en-sub">${esc(p.name_en)}</span>` : ""}</h3>
+        <p class="desc">${esc(pDesc(p))}</p>
+        <div class="price">${fmt(p.price_egp)}</div>
+        ${hasOpts(p) ? `
+        <div class="opts-label">${esc(lang === "ar" ? p.options.label_ar : p.options.label_en)}:</div>
+        <div class="opts" role="radiogroup" aria-label="${esc(lang === "ar" ? p.options.label_ar : p.options.label_en)}">
+          ${p.options.values.map((v,i) => `<button type="button" class="opt-chip${selectedOpt[p.id] === v.en ? " sel" : ""}" role="radio" aria-checked="${selectedOpt[p.id] === v.en}" data-opt-product="${esc(p.id)}" data-opt-value="${esc(v.en)}">${esc(lang === "ar" ? v.ar : v.en)}</button>`).join("")}
+        </div>
+        <div class="opt-err" id="optErr-${esc(p.id)}"></div>` : ""}
+        <button class="add" type="button" data-add="${p.id}">${t("add")}</button>
+      </div>
+    </article>`).join("");
+}
+
+function save(){ localStorage.setItem("gadgetna_cart", JSON.stringify(cart)); }
+// Cart keys: "<productId>" or "<productId>::<option value en>" for products with options
+const KEY_SEP = "::";
+const selectedOpt = {}; // productId -> chosen option value (en)
+function hasOpts(p){ return !!(p && p.options && Array.isArray(p.options.values) && p.options.values.length); }
+function cartKey(id, optEn){ return optEn ? id + KEY_SEP + optEn : id; }
+function parseKey(key){
+  const i = key.indexOf(KEY_SEP);
+  const id = i < 0 ? key : key.slice(0, i), optEn = i < 0 ? null : key.slice(i + KEY_SEP.length);
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return null;
+  if (hasOpts(p)){
+    const opt = optEn && p.options.values.find(v => v.en === optEn);
+    return opt ? { p, opt } : null;          // option-less or unknown option -> invalid line
+  }
+  return optEn ? null : { p, opt: null };
+}
+function sanitizeCart(){
+  if (!cart || typeof cart !== "object" || Array.isArray(cart)) cart = {};
+  const clean = {};
+  for (const [k, v] of Object.entries(cart)){
+    const q = Math.floor(Number(v));
+    if (parseKey(k) && q > 0) clean[k] = Math.min(q, 99);
+  }
+  cart = clean; save();
+}
+function optLabel(opt, l){ return opt ? (l === "ar" ? opt.ar : opt.en) : ""; }
+function cartItems(){
+  return Object.entries(cart).map(([key, q]) => { const r = parseKey(key); return r && q > 0 ? { key, p: r.p, opt: r.opt, q } : null; }).filter(Boolean);
+}
+function totals(){
+  const subtotal = cartItems().reduce((s,{p,q}) => s + p.price_egp * q, 0);
+  const shipping = subtotal > 0 ? SHIPPING_FEE_EGP : 0;
+  return { subtotal, shipping, total: subtotal + shipping };
+}
+function setQty(id, q){ if (q <= 0) delete cart[id]; else cart[id] = q; save(); renderCart(); }
+
+const PAYMENT_LABELS = {
+  cod:      { ar: "الدفع عند الاستلام", en: "Cash on delivery" },
+  instapay: { ar: "إنستاباي",           en: "InstaPay" },
+  vodafone: { ar: "فودافون كاش",        en: "Vodafone Cash" }
+};
+function selectedPayment(){ const r = document.querySelector('input[name="payment"]:checked'); return r ? r.value : "cod"; }
+function paymentTarget(m){ return m === "instapay" ? INSTAPAY_ADDRESS : m === "vodafone" ? VODAFONE_CASH_NUMBER : ""; }
+function renderPayBox(){
+  const box = $("payBox"); if (!box) return;
+  const m = selectedPayment();
+  if (m === "cod"){ box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false;
+  box.innerHTML = `
+    <div>${t("payTo_" + m)}</div>
+    <div class="row"><span class="val" id="payTarget">${esc(paymentTarget(m))}</span><button type="button" class="copy" id="copyBtn">${t("copy")}</button></div>
+    <div class="amt">${t("amountToPay")} <b id="payAmount">${fmt(totals().total)}</b></div>
+    <p>📸 ${t("payInstr")}</p>`;
+}
+function copyText(txt){
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(txt);
+  const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } finally { ta.remove(); }
+  return Promise.resolve();
+}
+
+function renderCart(){
+  const items = cartItems();
+  $("cartCount").textContent = items.reduce((s,x) => s + x.q, 0);
+  $("cartLines").innerHTML = items.length ? items.map(({key,p,opt,q}) => `
+    <div class="line">
+      <div class="em">${isImg(p.image) ? `<img src="${esc(p.image)}" style="width:44px;height:44px;object-fit:contain;background:#fff;border-radius:8px;padding:2px" alt="">` : p.image}</div>
+      <div class="info">${esc(pName(p))}${opt ? ` <span class="opt">(${esc(optLabel(opt, lang))})</span>` : ""}<small>${fmt(p.price_egp)} × ${q} = ${fmt(p.price_egp*q)}</small></div>
+      <div class="qty">
+        <button type="button" data-inc="${esc(key)}" aria-label="+">+</button>
+        <span>${q}</span>
+        <button type="button" data-dec="${esc(key)}" aria-label="-">−</button>
+      </div>
+    </div>`).join("") : `<div class="empty">${t("empty")}</div>`;
+  $("checkoutArea").style.display = items.length ? "" : "none";
+  const T = totals();
+  $("subtotal").textContent = fmt(T.subtotal);
+  $("shipping").textContent = fmt(T.shipping);
+  $("total").textContent = fmt(T.total);
+  renderPayBox();
+}
+
+function openCart(){ $("drawer").classList.add("open"); $("overlay").classList.add("show"); }
+function closeCart(){ $("drawer").classList.remove("open"); $("overlay").classList.remove("show"); }
+let toastTimer;
+function toast(msg){ const el = $("toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 1500); }
+
+function normalizePhone(v){
+  v = v.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[\s\-()]/g, "");
+  if (v.startsWith("+20")) v = "0" + v.slice(3); else if (v.startsWith("0020")) v = "0" + v.slice(4); else if (v.startsWith("20") && v.length === 12) v = "0" + v.slice(2);
+  return v;
+}
+
+function buildOrderMessage(d){
+  const T = totals();
+  const lines = cartItems().map(({p,opt,q}, i) => `${i+1}. ${p.name_ar}${opt ? ` (${opt.ar})` : ""} × ${q} = ${p.price_egp*q} جنيه`);
+  return [
+    "🛒 *طلب جديد من جادجتنا*", "",
+    "*المنتجات:*", ...lines, "",
+    `المجموع: ${T.subtotal} جنيه`,
+    `الشحن: ${T.shipping} جنيه`,
+    `*الإجمالي: ${T.total} جنيه*`,
+    ...(d.payment === "cod"
+      ? ["💵 طريقة الدفع: الدفع عند الاستلام"]
+      : [`💳 طريقة الدفع: ${PAYMENT_LABELS[d.payment].ar} (تحويل مقدم)`,
+         `${d.payment === "instapay" ? "عنوان إنستاباي" : "رقم فودافون كاش"}: ${paymentTarget(d.payment)}`,
+         `📸 برجاء إرسال سكرين شوت التحويل بمبلغ ${T.total} جنيه هنا على واتساب لتأكيد الطلب.`]),
+    "",
+    "*بيانات العميل:*",
+    `الاسم: ${d.name}`,
+    `الموبايل: ${d.phone}`,
+    `المحافظة: ${d.governorate}`,
+    `العنوان: ${d.address}`,
+    ...(d.notes ? [`ملاحظات: ${d.notes}`] : [])
+  ].join("\n");
+}
+function buildWhatsAppUrl(d){ return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildOrderMessage(d))}`; }
+
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-add]"), inc = e.target.closest("[data-inc]"), dec = e.target.closest("[data-dec]");
+  const chip = e.target.closest("[data-opt-product]");
+  if (chip){
+    const pid = chip.dataset.optProduct;
+    selectedOpt[pid] = chip.dataset.optValue;
+    document.querySelectorAll(`[data-opt-product="${CSS.escape(pid)}"]`).forEach(c => { const on = c === chip; c.classList.toggle("sel", on); c.setAttribute("aria-checked", on); });
+    const err = $("optErr-" + pid); if (err) err.textContent = "";
+  }
+  if (a){
+    const p = PRODUCTS.find(x => x.id === a.dataset.add);
+    if (hasOpts(p) && !selectedOpt[p.id]){
+      const err = $("optErr-" + p.id);
+      if (err) err.textContent = t("chooseOpt") + " " + (lang === "ar" ? p.options.label_ar : p.options.label_en).toLowerCase();
+      return;
+    }
+    const key = cartKey(p.id, hasOpts(p) ? selectedOpt[p.id] : null);
+    setQty(key, (cart[key] || 0) + 1); toast(t("added"));
+  }
+  if (inc) setQty(inc.dataset.inc, (cart[inc.dataset.inc] || 0) + 1);
+  if (dec) setQty(dec.dataset.dec, (cart[dec.dataset.dec] || 0) - 1);
+});
+$("cartBtn").onclick = openCart; $("closeCart").onclick = closeCart; $("overlay").onclick = closeCart;
+$("langBtn").onclick = () => { lang = lang === "ar" ? "en" : "ar"; localStorage.setItem("gadgetna_lang", lang); applyLang(); };
+
+$("checkoutForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const d = {
+    name: $("fName").value.trim(), phone: normalizePhone($("fPhone").value.trim()),
+    governorate: $("fGov").value, address: $("fAddr").value.trim(), notes: $("fNotes").value.trim(), payment: selectedPayment()
+  };
+  const errs = {
+    eName: d.name.length < 2 ? t("errName") : "",
+    ePhone: /^01[0125]\d{8}$/.test(d.phone) ? "" : t("errPhone"),
+    eGov: d.governorate ? "" : t("errGov"),
+    eAddr: d.address.length < 5 ? t("errAddr") : ""
+  };
+  Object.entries(errs).forEach(([k,v]) => $(k).textContent = v);
+  if (Object.values(errs).some(Boolean) || !cartItems().length) return;
+  const url = buildWhatsAppUrl(d);
+  window.lastWhatsAppUrl = url;
+  const w = window.open(url, "_blank");
+  if (!w) location.href = url; // fallback if popup blocked
+});
+
+["fName","fPhone","fGov","fAddr"].forEach(id => $(id).addEventListener("input", () => { $("e" + id.slice(1)).textContent = ""; }));
+document.addEventListener("change", e => { if (e.target.name === "payment") renderPayBox(); });
+document.addEventListener("click", e => {
+  if (e.target.id !== "copyBtn") return;
+  const btn = e.target;
+  copyText(paymentTarget(selectedPayment())).then(() => { btn.textContent = t("copied"); toast(t("copied")); setTimeout(() => btn.textContent = t("copy"), 1500); });
+});
+$("waFloat").href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("أهلاً جادجتنا 👋 عندي استفسار")}`;
+$("igLink").href = INSTAGRAM_URL; $("ttLink").href = TIKTOK_URL;
+$("year").textContent = new Date().getFullYear();
+sanitizeCart();
+applyLang();
+</script>
+</body>
+</html>
